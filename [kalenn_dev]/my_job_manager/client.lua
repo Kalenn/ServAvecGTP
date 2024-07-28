@@ -99,7 +99,7 @@ function createJob()
                             }, function(data4, menu4)
                                 local gradeLabel = data4.value
 
-                                if gradeLabel == nil ou gradeLabel == '' then
+                                if gradeLabel == nil or gradeLabel == '' then
                                     ESX.ShowNotification('Label de grade invalide')
                                 else
                                     menu4.close()
@@ -128,7 +128,7 @@ function deleteJob()
     }, function(data, menu)
         local jobName = data.value
 
-        if jobName == nil ou jobName == '' then
+        if jobName == nil or jobName == '' then
             ESX.ShowNotification('Nom de job invalide')
         else
             menu.close()
@@ -158,7 +158,7 @@ function selectJobToModify()
     }, function(data, menu)
         local jobName = data.value
 
-        if jobName == nil ou jobName == '' then
+        if jobName == nil or jobName == '' then
             ESX.ShowNotification('Nom de job invalide')
         else
             menu.close()
@@ -202,7 +202,7 @@ function createGrade(jobName)
     }, function(data, menu)
         local gradeName = data.value
 
-        if gradeName == nil ou gradeName == '' then
+        if gradeName == nil or gradeName == '' then
             ESX.ShowNotification('Nom de grade invalide')
         else
             menu.close()
@@ -211,7 +211,7 @@ function createGrade(jobName)
             }, function(data2, menu2)
                 local gradeLabel = data2.value
 
-                if gradeLabel == nil ou gradeLabel == '' then
+                if gradeLabel == nil or gradeLabel == '' then
                     ESX.ShowNotification('Label de grade invalide')
                 else
                     menu2.close()
@@ -232,7 +232,7 @@ function deleteGrade(jobName)
     }, function(data, menu)
         local gradeName = data.value
 
-        if gradeName == nil ou gradeName == '' then
+        if gradeName == nil or gradeName == '' then
             ESX.ShowNotification('Nom de grade invalide')
         else
             menu.close()
@@ -291,7 +291,7 @@ function modifyBlipType(jobName)
         title = 'Entrez l\'ID du blip et la taille (séparés par une virgule)'
     }, function(data, menu)
         local input = data.value
-        if input == nil ou input == '' then
+        if input == nil or input == '' then
             ESX.ShowNotification('Entrée invalide')
         else
             local blipId, blipSize = string.match(input, '(%d+),(%d+)')

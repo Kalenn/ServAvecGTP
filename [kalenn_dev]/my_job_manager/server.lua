@@ -47,6 +47,7 @@ AddEventHandler('my_job_manager:createJob', function(jobName, jobLabel, gradeNam
                             }, function(result3)
                                 if result3.affectedRows and result3.affectedRows > 0 then
                                     xPlayer.showNotification('Le job ~g~' .. jobLabel .. '~s~ et le grade ~g~' .. gradeLabel .. '~s~ ont été créés avec succès.')
+                                    updateClientBlips()
                                 else
                                     xPlayer.showNotification('~r~Erreur:~s~ le grade n\'a pas pu être créé pour le nouveau job.')
                                 end
@@ -76,6 +77,7 @@ AddEventHandler('my_job_manager:deleteJob', function(jobName, deleteGrades)
                     exports.oxmysql:execute('DELETE FROM job_admin WHERE job_name = ?', { jobName }, function(result2)
                         if result2.affectedRows and result2.affectedRows > 0 then
                             xPlayer.showNotification('Le job et ses blips associés ont été supprimés.')
+                            updateClientBlips()
                         else
                             xPlayer.showNotification('~r~Erreur:~s~ le job a été supprimé, mais pas les blips associés.')
                         end
@@ -205,7 +207,7 @@ AddEventHandler('my_job_manager:updateBlipColor', function(jobName, colorId)
         end)
     else
         xPlayer.showNotification('~r~Vous n\'avez pas la permission de faire ça.')
-    end
+    end)
 end)
 
 -- Mise à jour de la visibilité du blip
