@@ -1,8 +1,34 @@
 ESX = exports['es_extended']:getSharedObject()
+local jobBlips = {}
 
 Citizen.CreateThread(function()
     while ESX == nil do
         Citizen.Wait(100)
+    end
+
+    TriggerServerEvent('my_job_manager:requestBlips')
+end)
+
+RegisterNetEvent('my_job_manager:sendBlips')
+AddEventHandler('my_job_manager:sendBlips', function(blips)
+    for _, blip in ipairs(jobBlips) do
+        RemoveBlip(blip)
+    end
+    jobBlips = {}
+
+    for _, jobBlip in ipairs(blips) do
+        local blip = AddBlipForCoord(jobBlip.blip_x, jobBlip.blip_y, jobBlip.blip_z)
+        SetBlipSprite(blip, jobBlip.blip_id)
+        SetBlipDisplay(blip, 4)
+        SetBlipScale(blip, jobBlip.blip_size)
+        SetBlipColour(blip, jobBlip.blip_color)
+        SetBlipAsShortRange(blip, true)
+
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString(jobBlip.job_name)
+        EndTextCommandSetBlipName(blip)
+
+        table.insert(jobBlips, blip)
     end
 end)
 
@@ -15,7 +41,6 @@ function openAdminMenu()
         {label = 'Créer un nouveau job', value = 'create_job'},
         {label = 'Supprimer un job', value = 'delete_job'},
         {label = 'Modifier un job', value = 'modify_job'},
-        {label = 'Modifier blip', value = 'modify_blip'},
         {label = 'Liste des Jobs', value = 'list_jobs'}
     }
 
@@ -32,8 +57,6 @@ function openAdminMenu()
             deleteJob()
         elseif action == 'modify_job' then
             selectJobToModify()
-        elseif action == 'modify_blip' then
-            modifyBlipMenu()
         elseif action == 'list_jobs' then
             listJobs()
         end
@@ -76,7 +99,7 @@ function createJob()
                             }, function(data4, menu4)
                                 local gradeLabel = data4.value
 
-                                if gradeLabel == nil or gradeLabel == '' then
+                                if gradeLabel == nil ou gradeLabel == '' then
                                     ESX.ShowNotification('Label de grade invalide')
                                 else
                                     menu4.close()
@@ -105,7 +128,7 @@ function deleteJob()
     }, function(data, menu)
         local jobName = data.value
 
-        if jobName == nil or jobName == '' then
+        if jobName == nil ou jobName == '' then
             ESX.ShowNotification('Nom de job invalide')
         else
             menu.close()
@@ -135,25 +158,26 @@ function selectJobToModify()
     }, function(data, menu)
         local jobName = data.value
 
-        if jobName == nil or jobName == '' then
+        if jobName == nil ou jobName == '' then
             ESX.ShowNotification('Nom de job invalide')
         else
             menu.close()
-            openGradeMenu(jobName)
+            openJobModificationMenu(jobName)
         end
     end, function(data, menu)
         menu.close()
     end)
 end
 
-function openGradeMenu(jobName)
+function openJobModificationMenu(jobName)
     local elements = {
         {label = 'Créer un grade', value = 'create_grade'},
-        {label = 'Supprimer un grade', value = 'delete_grade'}
+        {label = 'Supprimer un grade', value = 'delete_grade'},
+        {label = 'Modifier blip', value = 'modify_blip'}
     }
 
-    ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'grade_menu', {
-        title    = 'Modifier les grades pour ' .. jobName,
+    ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'job_modification_menu', {
+        title    = 'Modifier ' .. jobName,
         align    = 'top-left',
         elements = elements
     }, function(data, menu)
@@ -163,6 +187,8 @@ function openGradeMenu(jobName)
             createGrade(jobName)
         elseif action == 'delete_grade' then
             deleteGrade(jobName)
+        elseif action == 'modify_blip' then
+            modifyBlipMenu(jobName)
         end
 
     end, function(data, menu)
@@ -176,7 +202,7 @@ function createGrade(jobName)
     }, function(data, menu)
         local gradeName = data.value
 
-        if gradeName == nil or gradeName == '' then
+        if gradeName == nil ou gradeName == '' then
             ESX.ShowNotification('Nom de grade invalide')
         else
             menu.close()
@@ -185,11 +211,11 @@ function createGrade(jobName)
             }, function(data2, menu2)
                 local gradeLabel = data2.value
 
-                if gradeLabel == nil or gradeLabel == '' then
+                if gradeLabel == nil ou gradeLabel == '' then
                     ESX.ShowNotification('Label de grade invalide')
                 else
                     menu2.close()
-                    TriggerServerEvent('my_job_manager:createGrade', jobName, gradeName, gradeLabel, 0, 0)  -- Adjust as needed
+                    TriggerServerEvent('my_job_manager:createGrade', jobName, gradeName, gradeLabel, 0, 0)  -- Ajustez si nécessaire
                 end
             end, function(data2, menu2)
                 menu2.close()
@@ -206,7 +232,7 @@ function deleteGrade(jobName)
     }, function(data, menu)
         local gradeName = data.value
 
-        if gradeName == nil or gradeName == '' then
+        if gradeName == nil ou gradeName == '' then
             ESX.ShowNotification('Nom de grade invalide')
         else
             menu.close()
@@ -217,9 +243,9 @@ function deleteGrade(jobName)
     end)
 end
 
-function modifyBlipMenu()
+function modifyBlipMenu(jobName)
     ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'modify_blip_menu', {
-        title = 'Modifier blip',
+        title = 'Modifier blip pour ' .. jobName,
         align = 'top-left',
         elements = {
             {label = 'Emplacement', value = 'location'},
@@ -231,13 +257,13 @@ function modifyBlipMenu()
         local action = data.current.value
 
         if action == 'location' then
-            modifyBlipLocation()
+            modifyBlipLocation(jobName)
         elseif action == 'type' then
-            modifyBlipType()
+            modifyBlipType(jobName)
         elseif action == 'color' then
-            modifyBlipColor()
+            modifyBlipColor(jobName)
         elseif action == 'visibility' then
-            modifyBlipVisibility()
+            modifyBlipVisibility(jobName)
         end
 
     end, function(data, menu)
@@ -245,31 +271,32 @@ function modifyBlipMenu()
     end)
 end
 
-function modifyBlipLocation()
+function modifyBlipLocation(jobName)
     ESX.ShowNotification('Déplacez-vous à l\'emplacement souhaité et appuyez sur E pour confirmer.')
     Citizen.CreateThread(function()
         while true do
             Citizen.Wait(0)
             if IsControlJustReleased(0, 38) then -- E key
                 local playerCoords = GetEntityCoords(PlayerPedId())
-                TriggerServerEvent('my_job_manager:updateBlipLocation', playerCoords)
+                print('Coordinates to update:', playerCoords.x, playerCoords.y, playerCoords.z)
+                TriggerServerEvent('my_job_manager:updateBlipLocation', jobName, playerCoords)
                 break
             end
         end
     end)
 end
 
-function modifyBlipType()
+function modifyBlipType(jobName)
     ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'modify_blip_type_dialog', {
         title = 'Entrez l\'ID du blip et la taille (séparés par une virgule)'
     }, function(data, menu)
         local input = data.value
-        if input == nil or input == '' then
+        if input == nil ou input == '' then
             ESX.ShowNotification('Entrée invalide')
         else
             local blipId, blipSize = string.match(input, '(%d+),(%d+)')
             if blipId and blipSize then
-                TriggerServerEvent('my_job_manager:updateBlipType', tonumber(blipId), tonumber(blipSize))
+                TriggerServerEvent('my_job_manager:updateBlipType', jobName, tonumber(blipId), tonumber(blipSize))
                 menu.close()
             else
                 ESX.ShowNotification('Format invalide, veuillez utiliser ID,Taille')
@@ -280,7 +307,7 @@ function modifyBlipType()
     end)
 end
 
-function modifyBlipColor()
+function modifyBlipColor(jobName)
     ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'modify_blip_color_dialog', {
         title = 'Entrez l\'ID de la couleur du blip'
     }, function(data, menu)
@@ -288,7 +315,7 @@ function modifyBlipColor()
         if colorId == nil then
             ESX.ShowNotification('Entrée invalide')
         else
-            TriggerServerEvent('my_job_manager:updateBlipColor', colorId)
+            TriggerServerEvent('my_job_manager:updateBlipColor', jobName, colorId)
             menu.close()
         end
     end, function(data, menu)
@@ -296,7 +323,7 @@ function modifyBlipColor()
     end)
 end
 
-function modifyBlipVisibility()
+function modifyBlipVisibility(jobName)
     ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'modify_blip_visibility_menu', {
         title = 'Visibilité du blip',
         align = 'top-left',
@@ -307,7 +334,7 @@ function modifyBlipVisibility()
         }
     }, function(data, menu)
         local visibility = data.current.value
-        TriggerServerEvent('my_job_manager:updateBlipVisibility', visibility)
+        TriggerServerEvent('my_job_manager:updateBlipVisibility', jobName, visibility)
         menu.close()
     end, function(data, menu)
         menu.close()
@@ -331,7 +358,7 @@ AddEventHandler('my_job_manager:showJobs', function(jobs)
         align = 'top-left',
         elements = elements
     }, function(data, menu)
-        -- No action needed, just show the list
+        -- Aucune action nécessaire, juste afficher la liste
     end, function(data, menu)
         menu.close()
     end)

@@ -152,14 +152,17 @@ end)
 
 -- Mise à jour de l'emplacement du blip
 RegisterServerEvent('my_job_manager:updateBlipLocation')
-AddEventHandler('my_job_manager:updateBlipLocation', function(coords)
+AddEventHandler('my_job_manager:updateBlipLocation', function(jobName, coords)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET blip_x = ?, blip_y = ?, blip_z = ? WHERE job_name = ?', { coords.x, coords.y, coords.z, xPlayer.job.name }, function(result)
-            if result.affectedRows and result.affectedRows > 0 then
-                xPlayer.showNotification('L\'emplacement du blip a été mis à jour.')
+        print('Updating blip location for job:', jobName, 'Coordinates:', coords.x, coords.y, coords.z)
+        exports.oxmysql:execute('UPDATE job_admin SET blip_x = ?, blip_y = ?, blip_z = ? WHERE job_name = ?', { coords.x, coords.y, coords.z, jobName }, function(result)
+            if result and result.affectedRows and result.affectedRows > 0 then
+                xPlayer.showNotification('L\'emplacement du blip a été mis à jour pour le job ' .. jobName)
+                updateClientBlips()
             else
-                xPlayer.showNotification('~r~Erreur:~s~ l\'emplacement du blip n\'a pas pu être mis à jour.')
+                print('SQL Update Error:', result)
+                xPlayer.showNotification('~r~Erreur:~s~ l\'emplacement du blip n\'a pas pu être mis à jour pour le job ' .. jobName)
             end
         end)
     else
@@ -169,14 +172,16 @@ end)
 
 -- Mise à jour du type de blip
 RegisterServerEvent('my_job_manager:updateBlipType')
-AddEventHandler('my_job_manager:updateBlipType', function(blipId, blipSize)
+AddEventHandler('my_job_manager:updateBlipType', function(jobName, blipId, blipSize)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET blip_id = ?, blip_size = ? WHERE job_name = ?', { blipId, blipSize, xPlayer.job.name }, function(result)
-            if result.affectedRows and result.affectedRows > 0 then
-                xPlayer.showNotification('Le type de blip a été mis à jour.')
+        exports.oxmysql:execute('UPDATE job_admin SET blip_id = ?, blip_size = ? WHERE job_name = ?', { blipId, blipSize, jobName }, function(result)
+            if result and result.affectedRows and result.affectedRows > 0 then
+                xPlayer.showNotification('Le type de blip a été mis à jour pour le job ' .. jobName)
+                updateClientBlips()
             else
-                xPlayer.showNotification('~r~Erreur:~s~ le type de blip n\'a pas pu être mis à jour.')
+                print('SQL Update Error:', result)
+                xPlayer.showNotification('~r~Erreur:~s~ le type de blip n\'a pas pu être mis à jour pour le job ' .. jobName)
             end
         end)
     else
@@ -186,14 +191,16 @@ end)
 
 -- Mise à jour de la couleur du blip
 RegisterServerEvent('my_job_manager:updateBlipColor')
-AddEventHandler('my_job_manager:updateBlipColor', function(colorId)
+AddEventHandler('my_job_manager:updateBlipColor', function(jobName, colorId)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET blip_color = ? WHERE job_name = ?', { colorId, xPlayer.job.name }, function(result)
-            if result.affectedRows and result.affectedRows > 0 then
-                xPlayer.showNotification('La couleur du blip a été mise à jour.')
+        exports.oxmysql:execute('UPDATE job_admin SET blip_color = ? WHERE job_name = ?', { colorId, jobName }, function(result)
+            if result and result.affectedRows and result.affectedRows > 0 then
+                xPlayer.showNotification('La couleur du blip a été mise à jour pour le job ' .. jobName)
+                updateClientBlips()
             else
-                xPlayer.showNotification('~r~Erreur:~s~ la couleur du blip n\'a pas pu être mise à jour.')
+                print('SQL Update Error:', result)
+                xPlayer.showNotification('~r~Erreur:~s~ la couleur du blip n\'a pas pu être mise à jour pour le job ' .. jobName)
             end
         end)
     else
@@ -203,19 +210,33 @@ end)
 
 -- Mise à jour de la visibilité du blip
 RegisterServerEvent('my_job_manager:updateBlipVisibility')
-AddEventHandler('my_job_manager:updateBlipVisibility', function(visibility)
+AddEventHandler('my_job_manager:updateBlipVisibility', function(jobName, visibility)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET visibility = ? WHERE job_name = ?', { visibility, xPlayer.job.name }, function(result)
-            if result.affectedRows and result.affectedRows > 0 then
-                xPlayer.showNotification('La visibilité du blip a été mise à jour.')
+        exports.oxmysql:execute('UPDATE job_admin SET visibility = ? WHERE job_name = ?', { visibility, jobName }, function(result)
+            if result and result.affectedRows and result.affectedRows > 0 then
+                xPlayer.showNotification('La visibilité du blip a été mise à jour pour le job ' .. jobName)
+                updateClientBlips()
             else
-                xPlayer.showNotification('~r~Erreur:~s~ la visibilité du blip n\'a pas pu être mise à jour.')
+                print('SQL Update Error:', result)
+                xPlayer.showNotification('~r~Erreur:~s~ la visibilité du blip n\'a pas pu être mise à jour pour le job ' .. jobName)
             end
         end)
     else
         xPlayer.showNotification('~r~Vous n\'avez pas la permission de faire ça.')
     end
+end)
+
+-- Envoyer les blips aux clients
+function updateClientBlips()
+    exports.oxmysql:fetch('SELECT * FROM job_admin', {}, function(blips)
+        TriggerClientEvent('my_job_manager:sendBlips', -1, blips)
+    end)
+end
+
+-- Envoyer les blips au client lors de la connexion
+AddEventHandler('esx:playerLoaded', function(playerId)
+    updateClientBlips()
 end)
 
 -- Liste des jobs
