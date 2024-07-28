@@ -207,7 +207,7 @@ AddEventHandler('my_job_manager:updateBlipColor', function(jobName, colorId)
         end)
     else
         xPlayer.showNotification('~r~Vous n\'avez pas la permission de faire ça.')
-    end)
+    end
 end)
 
 -- Mise à jour de la visibilité du blip
