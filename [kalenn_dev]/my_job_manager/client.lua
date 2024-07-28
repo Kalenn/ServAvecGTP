@@ -85,7 +85,7 @@ function createJob()
             }, function(data2, menu2)
                 local jobLabel = data2.value
 
-                if jobLabel == nil or jobLabel == '' then
+                if jobLabel == nil ou jobLabel == '' then
                     ESX.ShowNotification('Label de job invalide')
                 else
                     menu2.close()
@@ -94,7 +94,7 @@ function createJob()
                     }, function(data3, menu3)
                         local gradeName = data3.value
 
-                        if gradeName == nil or gradeName == '' then
+                        if gradeName == nil ou gradeName == '' then
                             ESX.ShowNotification('Nom de grade invalide')
                         else
                             menu3.close()
@@ -103,7 +103,7 @@ function createJob()
                             }, function(data4, menu4)
                                 local gradeLabel = data4.value
 
-                                if gradeLabel == nil or gradeLabel == '' then
+                                if gradeLabel == nil ou gradeLabel == '' then
                                     ESX.ShowNotification('Label de grade invalide')
                                 else
                                     menu4.close()

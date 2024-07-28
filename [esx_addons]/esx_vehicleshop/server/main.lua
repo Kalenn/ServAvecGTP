@@ -172,6 +172,14 @@ ESX.RegisterServerCallback('esx_vehicleshop:buyVehicle', function(source, cb, mo
 	end
 end)
 
+-- Assurez-vous que cet événement est déclenché lors de l'achat du véhicule
+RegisterServerEvent('esx_vehicleshop:sellVehicle')
+AddEventHandler('esx_vehicleshop:sellVehicle', function(vehicleProps, playerID)
+    local xPlayer = ESX.GetPlayerFromId(playerID)
+    TriggerClientEvent('esx_vehicleshop:addKey', playerID, vehicleProps.plate)
+    TriggerEvent('esx_vehicleshop:addKey', vehicleProps.plate)
+end)
+
 ESX.RegisterServerCallback('esx_vehicleshop:getCommercialVehicles', function(source, cb)
 	MySQL.query('SELECT price, vehicle FROM cardealer_vehicles ORDER BY vehicle ASC', function(result)
 		cb(result)

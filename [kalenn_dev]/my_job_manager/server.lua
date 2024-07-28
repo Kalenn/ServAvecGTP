@@ -28,8 +28,8 @@ AddEventHandler('my_job_manager:createJob', function(jobName, jobLabel, gradeNam
             0  -- Assumé comme non-whitelisted par défaut
         }, function(result)
             if result.affectedRows and result.affectedRows > 0 then
-                -- Insertion du job dans job_admin
-                exports.oxmysql:execute('INSERT INTO job_admin (job_name) VALUES (?)', {
+                -- Insertion du job dans job_blips
+                exports.oxmysql:execute('INSERT INTO job_blips (job_name) VALUES (?)', {
                     jobName
                 }, function(result2)
                     if result2.affectedRows and result2.affectedRows > 0 then
@@ -54,7 +54,7 @@ AddEventHandler('my_job_manager:createJob', function(jobName, jobLabel, gradeNam
                             end)
                         end)
                     else
-                        xPlayer.showNotification('~r~Erreur:~s~ le job n\'a pas pu être ajouté à la table job_admin.')
+                        xPlayer.showNotification('~r~Erreur:~s~ le job n\'a pas pu être ajouté à la table job_blips.')
                     end
                 end)
             else
@@ -74,7 +74,7 @@ AddEventHandler('my_job_manager:deleteJob', function(jobName, deleteGrades)
         local function deleteJob()
             exports.oxmysql:execute('DELETE FROM jobs WHERE name = ?', { jobName }, function(result)
                 if result.affectedRows and result.affectedRows > 0 then
-                    exports.oxmysql:execute('DELETE FROM job_admin WHERE job_name = ?', { jobName }, function(result2)
+                    exports.oxmysql:execute('DELETE FROM job_blips WHERE job_name = ?', { jobName }, function(result2)
                         if result2.affectedRows and result2.affectedRows > 0 then
                             xPlayer.showNotification('Le job et ses blips associés ont été supprimés.')
                             updateClientBlips()
@@ -158,7 +158,7 @@ AddEventHandler('my_job_manager:updateBlipLocation', function(jobName, coords)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
         print('Updating blip location for job:', jobName, 'Coordinates:', coords.x, coords.y, coords.z)
-        exports.oxmysql:execute('UPDATE job_admin SET blip_x = ?, blip_y = ?, blip_z = ? WHERE job_name = ?', { coords.x, coords.y, coords.z, jobName }, function(result)
+        exports.oxmysql:execute('UPDATE job_blips SET blip_x = ?, blip_y = ?, blip_z = ? WHERE job_name = ?', { coords.x, coords.y, coords.z, jobName }, function(result)
             if result and result.affectedRows and result.affectedRows > 0 then
                 xPlayer.showNotification('L\'emplacement du blip a été mis à jour pour le job ' .. jobName)
                 updateClientBlips()
@@ -177,7 +177,7 @@ RegisterServerEvent('my_job_manager:updateBlipType')
 AddEventHandler('my_job_manager:updateBlipType', function(jobName, blipId, blipSize)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET blip_id = ?, blip_size = ? WHERE job_name = ?', { blipId, blipSize, jobName }, function(result)
+        exports.oxmysql:execute('UPDATE job_blips SET blip_id = ?, blip_size = ? WHERE job_name = ?', { blipId, blipSize, jobName }, function(result)
             if result and result.affectedRows and result.affectedRows > 0 then
                 xPlayer.showNotification('Le type de blip a été mis à jour pour le job ' .. jobName)
                 updateClientBlips()
@@ -196,7 +196,7 @@ RegisterServerEvent('my_job_manager:updateBlipColor')
 AddEventHandler('my_job_manager:updateBlipColor', function(jobName, colorId)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET blip_color = ? WHERE job_name = ?', { colorId, jobName }, function(result)
+        exports.oxmysql:execute('UPDATE job_blips SET blip_color = ? WHERE job_name = ?', { colorId, jobName }, function(result)
             if result and result.affectedRows and result.affectedRows > 0 then
                 xPlayer.showNotification('La couleur du blip a été mise à jour pour le job ' .. jobName)
                 updateClientBlips()
@@ -215,7 +215,7 @@ RegisterServerEvent('my_job_manager:updateBlipVisibility')
 AddEventHandler('my_job_manager:updateBlipVisibility', function(jobName, visibility)
     local xPlayer = ESX.GetPlayerFromId(source)
     if xPlayer and xPlayer.getGroup() == 'admin' then
-        exports.oxmysql:execute('UPDATE job_admin SET visibility = ? WHERE job_name = ?', { visibility, jobName }, function(result)
+        exports.oxmysql:execute('UPDATE job_blips SET visibility = ? WHERE job_name = ?', { visibility, jobName }, function(result)
             if result and result.affectedRows and result.affectedRows > 0 then
                 xPlayer.showNotification('La visibilité du blip a été mise à jour pour le job ' .. jobName)
                 updateClientBlips()
@@ -231,7 +231,7 @@ end)
 
 -- Envoyer les blips aux clients
 function updateClientBlips()
-    exports.oxmysql:fetch('SELECT * FROM job_admin', {}, function(blips)
+    exports.oxmysql:fetch('SELECT * FROM job_blips', {}, function(blips)
         TriggerClientEvent('my_job_manager:sendBlips', -1, blips)
     end)
 end
@@ -258,7 +258,7 @@ end)
 RegisterServerEvent('my_job_manager:requestBlips')
 AddEventHandler('my_job_manager:requestBlips', function()
     local src = source
-    exports.oxmysql:fetch('SELECT * FROM job_admin', {}, function(blips)
+    exports.oxmysql:fetch('SELECT * FROM job_blips', {}, function(blips)
         TriggerClientEvent('my_job_manager:sendBlips', src, blips)
     end)
 end)
