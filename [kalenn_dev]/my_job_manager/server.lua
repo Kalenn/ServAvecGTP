@@ -253,3 +253,12 @@ AddEventHandler('my_job_manager:listJobs', function()
         xPlayer.showNotification('~r~Vous n\'avez pas la permission de faire ça.')
     end
 end)
+
+-- Demander les blips pour le client
+RegisterServerEvent('my_job_manager:requestBlips')
+AddEventHandler('my_job_manager:requestBlips', function()
+    local src = source
+    exports.oxmysql:fetch('SELECT * FROM job_admin', {}, function(blips)
+        TriggerClientEvent('my_job_manager:sendBlips', src, blips)
+    end)
+end)

@@ -11,24 +11,28 @@ end)
 
 RegisterNetEvent('my_job_manager:sendBlips')
 AddEventHandler('my_job_manager:sendBlips', function(blips)
+    -- Supprimer les anciens blips
     for _, blip in ipairs(jobBlips) do
         RemoveBlip(blip)
     end
     jobBlips = {}
 
+    -- Ajouter les nouveaux blips
     for _, jobBlip in ipairs(blips) do
-        local blip = AddBlipForCoord(jobBlip.blip_x, jobBlip.blip_y, jobBlip.blip_z)
-        SetBlipSprite(blip, jobBlip.blip_id)
-        SetBlipDisplay(blip, 4)
-        SetBlipScale(blip, jobBlip.blip_size)
-        SetBlipColour(blip, jobBlip.blip_color)
-        SetBlipAsShortRange(blip, true)
+        if jobBlip.blip_x and jobBlip.blip_y and jobBlip.blip_z then
+            local blip = AddBlipForCoord(jobBlip.blip_x, jobBlip.blip_y, jobBlip.blip_z)
+            SetBlipSprite(blip, jobBlip.blip_id)
+            SetBlipDisplay(blip, 4)
+            SetBlipScale(blip, jobBlip.blip_size)
+            SetBlipColour(blip, jobBlip.blip_color)
+            SetBlipAsShortRange(blip, true)
 
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentString(jobBlip.job_name)
-        EndTextCommandSetBlipName(blip)
+            BeginTextCommandSetBlipName("STRING")
+            AddTextComponentString(jobBlip.job_name)
+            EndTextCommandSetBlipName(blip)
 
-        table.insert(jobBlips, blip)
+            table.insert(jobBlips, blip)
+        end
     end
 end)
 
