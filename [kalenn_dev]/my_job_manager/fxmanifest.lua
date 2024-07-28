@@ -2,8 +2,8 @@ fx_version 'adamant'
 
 game 'gta5'
 
+author 'Kalenn'
 description 'Ajoute un metier simplement'
-
 version '1.0.0'
 
 client_script 'client.lua'

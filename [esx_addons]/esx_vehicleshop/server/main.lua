@@ -172,7 +172,6 @@ ESX.RegisterServerCallback('esx_vehicleshop:buyVehicle', function(source, cb, mo
 	end
 end)
 
--- Assurez-vous que cet événement est déclenché lors de l'achat du véhicule
 RegisterServerEvent('esx_vehicleshop:sellVehicle')
 AddEventHandler('esx_vehicleshop:sellVehicle', function(vehicleProps, playerID)
     local xPlayer = ESX.GetPlayerFromId(playerID)

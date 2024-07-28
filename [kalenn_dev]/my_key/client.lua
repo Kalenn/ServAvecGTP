@@ -1,9 +1,9 @@
-ESX = nil
+local ESX = nil
 local playerKeys = {}
 
 Citizen.CreateThread(function()
     while ESX == nil do
-        TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
+        ESX = exports['es_extended']:getSharedObject()
         Citizen.Wait(0)
     end
 
@@ -38,8 +38,8 @@ Citizen.CreateThread(function()
 end)
 
 function GetKeyFromConfig(key)
-    if key == '*' then
-        return 171 -- Key code for '*'
+    if key == 'L' then
+        return 182 -- Key code for 'L'
     else
         -- Ajoutez d'autres correspondances de touches si nécessaire
         return -1
